@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animated Heart</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Generate points in a heart shape
+    const particles = 2000;
+    const positions = [];
+
+    for (let i = 0; i < particles; i++) {
+      const t = Math.random() * Math.PI * 2;
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y =
+        13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t);
+      const z = (Math.random() - 0.5) * 2;
+
+      positions.push(x * 0.1 + (Math.random() - 0.5) * 0.3);
+      positions.push(y * 0.1 + (Math.random() - 0.5) * 0.3);
+      positions.push(z * 0.1);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3)
+    );
+
+    const material = new THREE.PointsMaterial({
+      color: 0xff3fa4,
+      size: 0.05,
+      transparent: true,
+      opacity: 0.9,
+    });
+
+    const heart = new THREE.Points(geometry, material);
+    scene.add(heart);
+
+    camera.position.z = 5;
+
+    // Animation using GSAP (rotation + pulse)
+    gsap.to(heart.rotation, {
+      y: 0.5,
+      repeat: -1,
+      yoyo: true,
+      duration: 3,
+      ease: "power2.inOut",
+    });
+
+    gsap.to(heart.scale, {
+      x: 1.1,
+      y: 1.1,
+      z: 1.1,
+      repeat: -1,
+      yoyo: true,
+      duration: 0.8,
+      ease: "power1.inOut",
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
